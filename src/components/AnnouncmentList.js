@@ -6,23 +6,23 @@ const Item = ({ title }) => (
     <Text variant='caption'>● {title}</Text>
 );
 
-const App = (mealDay = false) => {
+const App = (mealDay = false,data,curr ='') => {
     const renderItem = ({ item }) => (
         <Item title={item.title} />
     );
-    let data = [
+    /*let data = [
         {
             id: 1,
             title: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.'
         }
-    ];
+    ];*/
     return (
 <SafeAreaView style={{flex: 1}}>
         <FlatList
             data={data}
             renderItem={renderItem}
             ListHeaderComponent={<Text variant='overline'>AKTİF DUYURULAR</Text>}
-            ListFooterComponent={mealDay ? <Text variant='overline'>GÜNÜN YEMEĞİ</Text>:null}
+            ListFooterComponent={mealDay ? <><Text variant='overline'>GÜNÜN YEMEĞİ</Text><Text variant='caption'> {curr} </Text></>:null}
             keyExtractor={item => item.id}
         />
 </SafeAreaView>

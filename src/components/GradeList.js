@@ -3,7 +3,7 @@ import { FlatList, View, SafeAreaView } from 'react-native';
 import { Stack, Text, Divider } from "@react-native-material/core";
 
 
-const App = () => {
+const App = (data) => {
     const renderItem = ({ item }) => {
         if (item.vize > 0 && item.final > 0) {
             let points = item.vize * 0.4 + item.final * 0.6;
@@ -63,7 +63,7 @@ const App = () => {
 
 
     };
-    let data = [
+    /*let data = [
         {
             id: 1,
             title: 'Matematik',
@@ -76,7 +76,7 @@ const App = () => {
             vize: 55,
             final: 0
         }
-    ];
+    ];*/
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <FlatList

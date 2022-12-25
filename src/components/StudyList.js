@@ -6,17 +6,17 @@ const Item = ({ title }) => (
     <Text variant='caption'>● {title}</Text>
 );
 
-const App = () => {
+const App = (data) => {
     const renderItem = ({ item }) => (
         <Item title={item.title} />
     );
-    let data = [
+    /*let data = [
         {
             id: 1,
             title: 'Matematik',
             
         }
-    ];
+    ];*/
     return (
 <SafeAreaView style={{flex: 1}}>
         <FlatList

@@ -7,9 +7,7 @@ const App = ({navigation}) => {
   const [password, setPassword] = React.useState('123456');
   const [db, setDb] = React.useState(null);
  
-
   useEffect(() => {
-    console.log('ilk giriş');
     SQLite.enablePromise(true);
     SQLite.openDatabase({ name: 'rnSqliteSample.db', location: 'Documents' })
       .then(dbRes => { setDb(dbRes)})
@@ -17,7 +15,7 @@ const App = ({navigation}) => {
   }, []);
 
   const login = () =>{
-    console.log('ok')
+
     db.executeSql(
       `SELECT * FROM TBLKULLANICI WHERE TXTTCKIMLIKNO='${tc}' AND TXTPAROLA='${password}';`,
     )
@@ -40,7 +38,7 @@ const App = ({navigation}) => {
   }
 
   const setUser = (user) => {
-    console.log(user.TXTAD);
+
 
     db.executeSql(
       `INSERT OR REPLACE INTO TBLAKTIFKULLANICI
@@ -54,12 +52,12 @@ const App = ({navigation}) => {
       });
 
   }
-  
+
   return (
     <SafeAreaView>
       <Stack spacing={12} style={{ margin: 26 }}>
         <Avatar image={{ uri: "https://atauni.edu.tr/images/logo-3.png" }} size={100} style={{ alignSelf: 'center' }} />
-        <Text variant='overline'>ÖBS MOBİL APP {tc}</Text>
+        <Text variant='overline'>ÖBS MOBİL APP</Text>
         <TextInput
           label="TC Kimlik No"
           value={tc}

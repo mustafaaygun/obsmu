@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { SafeAreaView } from 'react-native';
 import { ActivityIndicator, Stack, Text } from "@react-native-material/core";
 import SQLite, { SQLiteDatabase, ResultSet } from 'react-native-sqlite-storage';
-const App =  ({navigation}) => {
+const App = ({ navigation }) => {
   let db;
   useEffect(() => {
     SQLite.enablePromise(true);
@@ -15,9 +15,9 @@ const App =  ({navigation}) => {
     console.warn('Error: ' + JSON.stringify(e));
   };
 
-  const dbOpened =  () => {
-     db.transaction( function (txn) {
-        txn.executeSql(`CREATE TABLE IF NOT EXISTS TBLKULLANICI(
+  const dbOpened = () => {
+    db.transaction(function (txn) {
+      txn.executeSql(`CREATE TABLE IF NOT EXISTS TBLKULLANICI(
         LNGKOD INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
         TXTTCKIMLIKNO VARCHAR(11) NOT NULL UNIQUE,
         TXTPAROLA NVARCHAR(100) NOT NULL,
@@ -39,7 +39,7 @@ const App =  ({navigation}) => {
 );`, []);
       txn.executeSql(`CREATE TABLE IF NOT EXISTS TBLDUYURULAR(
   LNGKOD INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  TXTAD NVARCHAR(100) NOT NULL,
+  TXTAD NVARCHAR(100) NOT NULL UNIQUE,
 BYTDURUM TINYINT NOT NULL
 );`, []);
       txn.executeSql(`CREATE TABLE IF NOT EXISTS TBLNOTLAR(
@@ -52,7 +52,7 @@ DBLFINAL DOUBLE
       txn.executeSql(`CREATE TABLE IF NOT EXISTS TBLYEMEKLER(
   LNGKOD INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   TXTAD TEXT NOT NULL,
-TRHTARIH DATE NOT NULL
+TRHTARIH DATE NOT NULL UNIQUE
 );`, []);
       txn.executeSql(`CREATE TABLE IF NOT EXISTS TBLAKTIFKULLANICI(
 	LNGOGRENCIKOD INTEGER NOT NULL,
@@ -64,8 +64,8 @@ TRHTARIH DATE NOT NULL
 
     //db.executeSql('DROP TABLE TBLKULLANICI')
 
-     db.executeSql(
-      `INSERT OR REPLACE INTO TBLKULLANICI
+    db.executeSql(
+      `INSERT INTO TBLKULLANICI
       (TXTTCKIMLIKNO,TXTPAROLA,TXTAD,TXTSOYAD,TXTTELEFONNO,TXTEMAIL,BYTUNVAN,BYTPAROLADURUM,BYTDURUM) 
       VALUES
       ('12345678122','123456', 'MUSATAFA', 'AYGÜN', '5555555555','M@M.COM.TR',0,1,1);`,
@@ -75,25 +75,25 @@ TRHTARIH DATE NOT NULL
         genericError(e);
       });
 
-     db.executeSql(
+    db.executeSql(
       `SELECT * FROM TBLAKTIFKULLANICI;`,
     )
       .then(result => recordsSelected(result))
       .catch(e => {
         genericError(e);
       });
-      
+
 
     const recordsSelected = (result) => {
-      console.log('ss')
-     
-      if(result?.[0].rows.length > 0){
+
+
+      if (result?.[0].rows.length > 0) {
         navigation.navigate('Navigation');
-      }else {
+      } else {
         navigation.navigate('LoginScreen');
       }
 
-      console.log('qq')
+
       result?.[0].rows.raw().forEach((v, i) => console.info(v));
       const index = 0;
       const recordAtIndex = result?.[0].rows.item(index);

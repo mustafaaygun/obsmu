@@ -1,6 +1,6 @@
 import React, { useEffect,useState } from 'react';
 import { SafeAreaView } from 'react-native';
-import { Button, Stack, TextInput, Avatar, Text } from "@react-native-material/core";
+import { Button, Stack, TextInput, Avatar, Text, Pressable } from "@react-native-material/core";
 import SQLite, { SQLiteDatabase, ResultSet } from 'react-native-sqlite-storage';
 const App = ({navigation}) => {
   const [tc, setTc] = React.useState('12345678122');
@@ -70,7 +70,7 @@ const App = ({navigation}) => {
           secureTextEntry={true}
         />
         <Button color='#292559' title="GİRİŞ YAP" onPress={login} />
-        <Text variant='caption' color='#292559'>Kayıt Ol</Text>
+        <Pressable onPress={()=>navigation.navigate('Register')}><Text variant='caption' color='#292559'>Kayıt Ol</Text></Pressable>
       </Stack>
     </SafeAreaView>
   )

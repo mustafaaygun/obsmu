@@ -59,21 +59,70 @@ TRHTARIH DATE NOT NULL UNIQUE
   	TXTADSOYAD TEXT NOT NULL,
   	BYTUNVAN TINYINT NOT NULL
 );`, []);
+
+      //db.executeSql('DROP TABLE TBLKULLANICI')
     });
 
 
-    //db.executeSql('DROP TABLE TBLKULLANICI')
-
     db.executeSql(
-      `INSERT INTO TBLKULLANICI
+      `SELECT * FROM TBLKULLANICI WHERE TXTTCKIMLIKNO='12345678121';`,
+    )
+      .then(result => {
+        if (result?.[0].rows.length > 0) {
+        } else {
+          db.executeSql(
+            `INSERT INTO TBLKULLANICI
       (TXTTCKIMLIKNO,TXTPAROLA,TXTAD,TXTSOYAD,TXTTELEFONNO,TXTEMAIL,BYTUNVAN,BYTPAROLADURUM,BYTDURUM) 
       VALUES
-      ('12345678122','123456', 'MUSATAFA', 'AYGÜN', '5555555555','M@M.COM.TR',0,1,1);`,
-    )
-      .then(result => recordsInserted(result))
-      .catch(e => {
-        genericError(e);
+      ('12345678121','123456', 'MUSATAFA', 'AYGÜN', '5555555555','M@M.COM.TR',0,1,1);
+      `,
+          )
+            .then(result => recordsInserted(result))
+            .catch(e => {
+              genericError(e);
+            });
+        }
       });
+
+      db.executeSql(
+      `SELECT * FROM TBLKULLANICI WHERE TXTTCKIMLIKNO='12345678122';`,
+    )
+      .then(result => {
+        if (result?.[0].rows.length > 0) {
+        } else {
+          db.executeSql(
+            `INSERT INTO TBLKULLANICI
+        (TXTTCKIMLIKNO,TXTPAROLA,TXTAD,TXTSOYAD,TXTTELEFONNO,TXTEMAIL,BYTUNVAN,BYTPAROLADURUM,BYTDURUM) 
+        VALUES
+        ('12345678122','123456', 'MUSATAFA', 'AYGÜN', '5555555555','M@M.COM.TR',1,1,1);
+        `,
+          )
+            .then(result => recordsInserted(result))
+            .catch(e => {
+              genericError(e);
+            });
+        }
+      })
+
+      db.executeSql(
+      `SELECT * FROM TBLKULLANICI WHERE TXTTCKIMLIKNO='12345678123';`,
+    )
+      .then(result => {
+        if (result?.[0].rows.length > 0) {
+        } else {
+          db.executeSql(
+            `INSERT INTO TBLKULLANICI
+          (TXTTCKIMLIKNO,TXTPAROLA,TXTAD,TXTSOYAD,TXTTELEFONNO,TXTEMAIL,BYTUNVAN,BYTPAROLADURUM,BYTDURUM) 
+          VALUES
+          ('12345678123','123456', 'MUSATAFA', 'AYGÜN', '5555555555','M@M.COM.TR',2,1,1);
+          `,
+          )
+            .then(result => recordsInserted(result))
+            .catch(e => {
+              genericError(e);
+            });
+        }
+      })
 
     db.executeSql(
       `SELECT * FROM TBLAKTIFKULLANICI;`,

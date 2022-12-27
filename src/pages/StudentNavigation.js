@@ -1,59 +1,65 @@
 import * as React from 'react';
+import { createStackNavigator } from '@react-navigation/stack'
 import { View, ScrollView } from 'react-native';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navigation/drawer';
-import { Button, Stack, TextInput, Avatar, Text, Pressable, Switch, select } from "@react-native-material/core";
+import { Button, Stack, TextInput, Avatar, Text, Pressable, Switch } from "@react-native-material/core";
 import { MaterialDatetimePickerAndroid } from 'react-native-material-datetime-picker';
 import SQLite, { SQLiteDatabase, ResultSet } from 'react-native-sqlite-storage';
 import AnnouncmentList from '../components/AnnouncmentList';
 import StudyList from '../components/StudyList';
 import GradeList from '../components/GradeList';
 import { SelectList } from 'react-native-dropdown-select-list'
+import { CommonActions } from '@react-navigation/native';
 function HomeScreen({ navigation }) {
 
   const [db, setDb] = React.useState(null);
   const [data, setData] = React.useState([]);
   const [curr, setCurr] = React.useState('');
+
   React.useEffect(() => {
-    SQLite.enablePromise(true);
-    SQLite.openDatabase({ name: 'rnSqliteSample.db', location: 'Documents' })
-      .then(dbRes => {
-        setDb(dbRes);
-        dbRes.executeSql(
-          `SELECT * FROM TBLDUYURULAR WHERE BYTDURUM=1;`,
-        )
-          .then(result => {
-            if (result?.[0].rows.length > 0) {
-              let currData = [];
-              for (let index = 0; index < result?.[0].rows.length; index++) {
-                let item = result?.[0].rows.item(index);
-                currData.push({ id: item.LNGKOD, title: item.TXTAD });
+
+    let unsubscribe = navigation.addListener('focus', () => {
+
+      SQLite.enablePromise(true);
+      SQLite.openDatabase({ name: 'rnSqliteSample.db', location: 'Documents' })
+        .then(dbRes => {
+          setDb(dbRes);
+          dbRes.executeSql(
+            `SELECT * FROM TBLDUYURULAR WHERE BYTDURUM=1;`,
+          )
+            .then(result => {
+              if (result?.[0].rows.length > 0) {
+                let currData = [];
+                for (let index = 0; index < result?.[0].rows.length; index++) {
+                  let item = result?.[0].rows.item(index);
+                  currData.push({ id: item.LNGKOD, title: item.TXTAD });
+                }
+                setData(currData);
               }
-              setData(currData);
-            }
-          })
-          .catch(e => {
-            //genericError(e);
-          });
 
+            })
+            .catch(e => {
 
-        dbRes.executeSql(
-          `SELECT * FROM TBLYEMEKLER  WHERE TRHTARIH='${new Date().toISOString().slice(0, 10)}';`,
-        )
-          .then(result => {
+            });
+          dbRes.executeSql(
+            `SELECT * FROM TBLYEMEKLER  WHERE TRHTARIH='${new Date().toISOString().slice(0, 10)}';`,
+          )
+            .then(result => {
+              if (result?.[0].rows.length > 0) {
+                let food = result?.[0].rows.item(0);
+                setCurr(food.TXTAD);
+              } else {
+                setCurr('');
+              }
 
-            if (result?.[0].rows.length > 0) {
-              let food = result?.[0].rows.item(0);
-              setCurr(food.TXTAD);
-            } else {
+            })
+            .catch(e => {
               setCurr('');
-            }
-          })
-          .catch(e => {
-            setCurr('');
-          });
-      })
 
-
+            });
+        })
+    });
+    return unsubscribe;
   }, [navigation]);
 
   return (
@@ -63,34 +69,42 @@ function HomeScreen({ navigation }) {
   );
 }
 
+const Stacks = createStackNavigator()
+
+
+
 function CourseScreen({ navigation }) {
   const [db, setDb] = React.useState(null);
   const [data, setData] = React.useState([]);
 
   React.useEffect(() => {
-    SQLite.enablePromise(true);
-    SQLite.openDatabase({ name: 'rnSqliteSample.db', location: 'Documents' })
-      .then(dbRes => {
-        setDb(dbRes);
-        dbRes.executeSql(
-          `SELECT * FROM TBLDERSLER;`,
-        )
-          .then(result => {
-            if (result?.[0].rows.length > 0) {
-              let currData = [];
-              for (let index = 0; index < result?.[0].rows.length; index++) {
-                let item = result?.[0].rows.item(index);
-                currData.push({ id: item.LNGKOD, title: item.TXTAD });
+    const unsubscribe = navigation.addListener('focus', () => {
+      SQLite.enablePromise(true);
+      SQLite.openDatabase({ name: 'rnSqliteSample.db', location: 'Documents' })
+        .then(dbRes => {
+          setDb(dbRes);
+          dbRes.executeSql(
+            `SELECT * FROM TBLDERSLER;`,
+          )
+            .then(result => {
+              if (result?.[0].rows.length > 0) {
+                let currData = [];
+                for (let index = 0; index < result?.[0].rows.length; index++) {
+                  let item = result?.[0].rows.item(index);
+                  currData.push({ id: item.LNGKOD, title: item.TXTAD });
+                }
+                setData(currData);
               }
-              setData(currData);
-            }
-          })
-          .catch(e => {
-            //genericError(e);
-          });
+            })
+            .catch(e => {
+              //genericError(e);
+            });
 
 
-      })
+        })
+
+    })
+    return unsubscribe;
 
 
   }, [navigation]);
@@ -109,54 +123,58 @@ function GradeScreen({ navigation }) {
   const [LNGKOD, setLNGKOD] = React.useState('');
 
   React.useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
 
-    SQLite.enablePromise(true);
-    SQLite.openDatabase({ name: 'rnSqliteSample.db', location: 'Documents' })
-      .then(dbRes => {
-        setDb(dbRes);
-        dbRes.executeSql(
-          `SELECT * FROM TBLAKTIFKULLANICI;`,
-        )
-          .then(result => {
-            if (result?.[0].rows.length > 0) {
-              let user = result?.[0].rows.item(0);
+      SQLite.enablePromise(true);
+      SQLite.openDatabase({ name: 'rnSqliteSample.db', location: 'Documents' })
+        .then(dbRes => {
+          setDb(dbRes);
+          dbRes.executeSql(
+            `SELECT * FROM TBLAKTIFKULLANICI;`,
+          )
+            .then(result => {
+              if (result?.[0].rows.length > 0) {
+                let user = result?.[0].rows.item(0);
 
-           
-            
-              dbRes.executeSql(
-                `SELECT D.TXTAD,N.LNGKOD,N.DBLVIZE,N.DBLFINAL FROM TBLNOTLAR N
-                INNER JOIN TBLDERSLER D ON D.LNGKOD=N.LNGDERSKOD
-                WHERE N.LNGOGRENCIKOD=${user.LNGOGRENCIKOD};`,
-              )
-                .then(result => {
-           
-                 
-                  if (result?.[0].rows.length > 0) {
-                   
-                    let currData = [];
-                    for (let index = 0; index < result?.[0].rows.length; index++) {
-                      let item = result?.[0].rows.item(index);
-                      currData.push({ id: item.LNGKOD, title: item.TXTAD,vize:item.DBLVIZE,final:item.DBLFINAL });
+
+
+                dbRes.executeSql(
+                  `SELECT D.TXTAD,N.LNGKOD,N.DBLVIZE,N.DBLFINAL FROM TBLNOTLAR N
+                  INNER JOIN TBLDERSLER D ON D.LNGKOD=N.LNGDERSKOD
+                  WHERE N.LNGOGRENCIKOD=${user.LNGOGRENCIKOD};`,
+                )
+                  .then(result => {
+
+
+                    if (result?.[0].rows.length > 0) {
+
+                      let currData = [];
+                      for (let index = 0; index < result?.[0].rows.length; index++) {
+                        let item = result?.[0].rows.item(index);
+                        currData.push({ id: item.LNGKOD, title: item.TXTAD, vize: item.DBLVIZE, final: item.DBLFINAL });
+                      }
+                      setCurr(currData);
+                    } else {
+                      //setCurr('');
+
                     }
-                    setCurr(currData);
-                  } else {
-                    //setCurr('');
-  
-                  }
-                })
-                .catch(e => {
-                  console.log(e)
-                });
+                  })
+                  .catch(e => {
+                    console.log(e)
+                  });
 
 
-            }
-          })
-          .catch(e => {
-            console.log(e);
-          });
-      })
-      .catch(e => console.log(e));
-  }, []);
+              }
+            })
+            .catch(e => {
+              console.log(e);
+            });
+        })
+        .catch(e => console.log(e));
+    })
+    return unsubscribe;
+
+  }, [navigation]);
 
   return (
     <Stack fill style={{ margin: 12 }}>
@@ -170,29 +188,33 @@ function AnnouncementScreen({ navigation }) {
   const [data, setData] = React.useState(null);
 
   React.useEffect(() => {
-    SQLite.enablePromise(true);
-    SQLite.openDatabase({ name: 'rnSqliteSample.db', location: 'Documents' })
-      .then(dbRes => {
-        setDb(dbRes);
-        dbRes.executeSql(
-          `SELECT * FROM TBLDUYURULAR WHERE BYTDURUM=1;`,
-        )
-          .then(result => {
-            if (result?.[0].rows.length > 0) {
-              let currData = [];
-              for (let index = 0; index < result?.[0].rows.length; index++) {
-                let item = result?.[0].rows.item(index);
-                currData.push({ id: item.LNGKOD, title: item.TXTAD });
+    const unsubscribe = navigation.addListener('focus', () => {
+      SQLite.enablePromise(true);
+      SQLite.openDatabase({ name: 'rnSqliteSample.db', location: 'Documents' })
+        .then(dbRes => {
+          setDb(dbRes);
+          dbRes.executeSql(
+            `SELECT * FROM TBLDUYURULAR WHERE BYTDURUM=1;`,
+          )
+            .then(result => {
+              if (result?.[0].rows.length > 0) {
+                let currData = [];
+                for (let index = 0; index < result?.[0].rows.length; index++) {
+                  let item = result?.[0].rows.item(index);
+                  currData.push({ id: item.LNGKOD, title: item.TXTAD });
+                }
+                setData(currData);
               }
-              setData(currData);
-            }
-          })
-          .catch(e => {
-            //genericError(e);
-          });
-      })
+            })
+            .catch(e => {
+              //genericError(e);
+            });
+        })
+    });
+    return unsubscribe;
 
-  }, [setDb]);
+
+  }, [navigation]);
 
   return (
     <Stack fill style={{ margin: 12 }}>
@@ -209,31 +231,35 @@ function DinnerListScreen({ navigation }) {
 
 
   React.useEffect(() => {
-    SQLite.enablePromise(true);
-    SQLite.openDatabase({ name: 'rnSqliteSample.db', location: 'Documents' })
-      .then(dbRes => {
-        setDb(dbRes);
+    const unsubscribe = navigation.addListener('focus', () => {
+      SQLite.enablePromise(true);
+      SQLite.openDatabase({ name: 'rnSqliteSample.db', location: 'Documents' })
+        .then(dbRes => {
+          setDb(dbRes);
 
-        dbRes.executeSql(
-          `SELECT * FROM TBLYEMEKLER  WHERE TRHTARIH='${date.toISOString().slice(0, 10)}';`,
-        )
-          .then(result => {
-            if (result?.[0].rows.length > 0) {
-              let food = result?.[0].rows.item(0);
-              setMenu(food.TXTAD);
+          dbRes.executeSql(
+            `SELECT * FROM TBLYEMEKLER  WHERE TRHTARIH='${date.toISOString().slice(0, 10)}';`,
+          )
+            .then(result => {
+              if (result?.[0].rows.length > 0) {
+                let food = result?.[0].rows.item(0);
+                setMenu(food.TXTAD);
 
-            } else {
+              } else {
+                setMenu('');
+              }
+            })
+            .catch(e => {
               setMenu('');
-            }
-          })
-          .catch(e => {
-            setMenu('');
-          });
+            });
 
 
-      })
-      .catch(e => { console.log(e); });
-  }, [setDate, setMenu, setDb]);
+        })
+        .catch(e => { console.log(e); });
+    });
+    return unsubscribe;
+
+  }, [navigation]);
 
   const showDatePicker = () => {
     MaterialDatetimePickerAndroid.show({
@@ -246,11 +272,11 @@ function DinnerListScreen({ navigation }) {
           `SELECT * FROM TBLYEMEKLER  WHERE TRHTARIH='${date.toISOString().slice(0, 10)}';`,
         )
           .then(result => {
-           
+
             if (result?.[0].rows.length > 0) {
-            
+
               let food = result?.[0].rows.item(0);
-             
+
               setMenu(food.TXTAD);
 
             } else {
@@ -281,15 +307,39 @@ const Drawer = createDrawerNavigator();
 
 function CustomDrawerContent(props) {
 
+  const logout = () => {
+    SQLite.enablePromise(true);
+    SQLite.openDatabase({ name: 'rnSqliteSample.db', location: 'Documents' })
+      .then(dbRes => {
+        dbRes.executeSql(
+          `DELETE FROM TBLAKTIFKULLANICI`,
+        )
+          .then(result => {
+            props.navigation.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [
+                  { name: 'LoginScreen' },
+                ],
+              })
+            );
+          })
+      })
+  }
   return (
     <DrawerContentScrollView {...props}>
       <View style={{ marginTop: 8, marginLeft: 8 }}>
         <Avatar image={{ uri: "https://atauni.edu.tr/images/logo-3.png" }} size={50} style={{ alignSelf: 'center' }} />
         <Text variant='caption'>ÖBS MOBİL APP</Text>
+        <Stack spacing={6}>
+        
         <Text variant='overline'>{props.username}</Text>
         <Text variant='overline'>{props.title}</Text>
+        <Pressable onPress={logout}><Text variant='overline' style={{color:'red'}}>Çıkış Yap</Text></Pressable>
+        </Stack>
       </View>
-      <DrawerItemList {...props} />
+      {<DrawerItemList {...props} />}
+      {/*lapsList(props)*/}
     </DrawerContentScrollView>
   );
 }
@@ -298,11 +348,14 @@ function AddCourseScreen({ navigation }) {
   const [course, setCourse] = React.useState('');
   const [db, setDb] = React.useState(null);
   React.useEffect(() => {
-    SQLite.enablePromise(true);
-    SQLite.openDatabase({ name: 'rnSqliteSample.db', location: 'Documents' })
-      .then(dbRes => { setDb(dbRes); })
-      .catch(e => { console.log(e); });
-  }, [setDb]);
+    const unsubscribe = navigation.addListener('focus', () => {
+      SQLite.enablePromise(true);
+      SQLite.openDatabase({ name: 'rnSqliteSample.db', location: 'Documents' })
+        .then(dbRes => { setDb(dbRes); })
+        .catch(e => { console.log(e); });
+    });
+    return unsubscribe;
+  }, [navigation]);
 
 
   const save = () => {
@@ -343,12 +396,14 @@ function AddAnnouncementScreen({ navigation }) {
   const [db, setDb] = React.useState(null);
   const [checked, setChecked] = React.useState(true);
   React.useEffect(() => {
-   
-    SQLite.enablePromise(true);
-    SQLite.openDatabase({ name: 'rnSqliteSample.db', location: 'Documents' })
-      .then(dbRes => { setDb(dbRes); })
-      .catch(e => { console.log(e); });
-  }, [setDb]);
+    const unsubscribe = navigation.addListener('focus', () => {
+      SQLite.enablePromise(true);
+      SQLite.openDatabase({ name: 'rnSqliteSample.db', location: 'Documents' })
+        .then(dbRes => { setDb(dbRes); })
+        .catch(e => { console.log(e); });
+    });
+    return unsubscribe;
+  }, [navigation]);
 
 
   const save = () => {
@@ -398,49 +453,52 @@ function AddOrUpdateGradeScreen({ navigation }) {
   const [selectedType, setSelectedType] = React.useState(-1);
   const [grade, setGrade] = React.useState("");
   React.useEffect(() => {
-    SQLite.enablePromise(true);
-    SQLite.openDatabase({ name: 'rnSqliteSample.db', location: 'Documents' })
-      .then(dbRes => {
-        setDb(dbRes);
-        dbRes.executeSql(
-          `SELECT * FROM TBLKULLANICI WHERE BYTDURUM=1 AND BYTUNVAN=0;`,
-        )
-          .then(result => {
-            if (result?.[0].rows.length > 0) {
-              let currData = [];
-              for (let index = 0; index < result?.[0].rows.length; index++) {
-                let item = result?.[0].rows.item(index);
-                currData.push({ key: item.LNGKOD, value: item.TXTAD + ' ' + item.TXTSOYAD, disabled: false });
+    const unsubscribe = navigation.addListener('focus', () => {
+      SQLite.enablePromise(true);
+      SQLite.openDatabase({ name: 'rnSqliteSample.db', location: 'Documents' })
+        .then(dbRes => {
+          setDb(dbRes);
+          dbRes.executeSql(
+            `SELECT * FROM TBLKULLANICI WHERE BYTDURUM=1 AND BYTUNVAN=0;`,
+          )
+            .then(result => {
+              if (result?.[0].rows.length > 0) {
+                let currData = [];
+                for (let index = 0; index < result?.[0].rows.length; index++) {
+                  let item = result?.[0].rows.item(index);
+                  currData.push({ key: item.LNGKOD, value: item.TXTAD + ' ' + item.TXTSOYAD, disabled: false });
+                }
+                setDataUser(currData);
               }
-              setDataUser(currData);
-            }
-          })
-          .catch(e => {
-            //genericError(e);
-          });
+            })
+            .catch(e => {
+              //genericError(e);
+            });
 
-        dbRes.executeSql(
-          `SELECT * FROM TBLDERSLER;`,
-        )
-          .then(result => {
-         
-            if (result?.[0].rows.length > 0) {
-              let currData = [];
-              for (let index = 0; index < result?.[0].rows.length; index++) {
-                let item = result?.[0].rows.item(index);
-                console.log(item)
+          dbRes.executeSql(
+            `SELECT * FROM TBLDERSLER;`,
+          )
+            .then(result => {
 
-                currData.push({ key: item.LNGKOD, value: item.TXTAD, disabled: false });
+              if (result?.[0].rows.length > 0) {
+                let currData = [];
+                for (let index = 0; index < result?.[0].rows.length; index++) {
+                  let item = result?.[0].rows.item(index);
+                  console.log(item)
+
+                  currData.push({ key: item.LNGKOD, value: item.TXTAD, disabled: false });
+                }
+                setDataLesson(currData);
+              } else {
+
               }
-              setDataLesson(currData);
-            } else {
-              
-            }
-          })
-          .catch(e => {
-            console.log(e);
-          });
-      })
+            })
+            .catch(e => {
+              console.log(e);
+            });
+        })
+    });
+    return unsubscribe;
 
 
   }, [navigation]);
@@ -492,36 +550,36 @@ function AddOrUpdateGradeScreen({ navigation }) {
 
   }
 
-const get = (val) => {
+  const get = (val) => {
 
-  if (selectedUser != -1 && selectedLesson != -1 && val != -1) {
-    setGrade('');
-    let selected = 'DBLFINAL';
-  
-    
-    db.executeSql(
-    `SELECT * FROM TBLNOTLAR WHERE LNGOGRENCIKOD=${selectedUser} AND LNGDERSKOD=${selectedLesson};`,
-  ).then(result => {
-    console.log('m')
-    if (result?.[0].rows.length > 0) {
-      let grade = result?.[0].rows.item(0);
-      console.log(grade)
-      if (val == 1) {
-        setGrade(grade.DBLVIZE.toString());
-      }else{
-       if(grade.DBLFINAL == null){
-        setGrade('');
-       }else{
-        setGrade(grade.DBLFINAL.toString());
-       }
-      }
-      //setCurr(food.TXTAD);
-    } else {
-      //setCurr('yok');
+    if (selectedUser != -1 && selectedLesson != -1 && val != -1) {
+      setGrade('');
+      let selected = 'DBLFINAL';
+
+
+      db.executeSql(
+        `SELECT * FROM TBLNOTLAR WHERE LNGOGRENCIKOD=${selectedUser} AND LNGDERSKOD=${selectedLesson};`,
+      ).then(result => {
+        console.log('m')
+        if (result?.[0].rows.length > 0) {
+          let grade = result?.[0].rows.item(0);
+          console.log(grade)
+          if (val == 1) {
+            setGrade(grade.DBLVIZE.toString());
+          } else {
+            if (grade.DBLFINAL == null) {
+              setGrade('');
+            } else {
+              setGrade(grade.DBLFINAL.toString());
+            }
+          }
+          //setCurr(food.TXTAD);
+        } else {
+          //setCurr('yok');
+        }
+      });
     }
-  });
   }
-}
   const notData = [
     { key: 1, value: 'Vize', disabled: false },
     { key: 2, value: 'Final', disabled: false },
@@ -529,21 +587,33 @@ const get = (val) => {
   return (
     <Stack spacing={16} fill style={{ margin: 12 }}>
       <SelectList
-        setSelected={(val) => {setSelectedUser(val);get(val);}}
+      boxStyles={{backgroundColor:'white'}}
+      dropdownStyles={{backgroundColor:'white'}}
+      inputStyles={{color:'black'}}
+      dropdownTextStyles={{color:'black'}}
+        setSelected={(val) => { setSelectedUser(val); get(val); }}
         data={dataUser}
         save="key"
         placeholder='Öğrenci Seçiniz'
       />
       <View style={{ marginTop: 8 }}></View>
       <SelectList
-        setSelected={(val) => {setSelectedLesson(val);get(val);}}
+       boxStyles={{backgroundColor:'white'}}
+       dropdownStyles={{backgroundColor:'white'}}
+       inputStyles={{color:'black'}}
+       dropdownTextStyles={{color:'black'}}
+        setSelected={(val) => { setSelectedLesson(val); get(val); }}
         data={dataLesson}
         save="key"
         placeholder='Ders Seçiniz'
       />
       <View style={{ marginTop: 8 }}></View>
       <SelectList
-        setSelected={(val) => {setSelectedType(val);get(val);}}
+       boxStyles={{backgroundColor:'white'}}
+       dropdownStyles={{backgroundColor:'white'}}
+       inputStyles={{color:'black'}}
+       dropdownTextStyles={{color:'black'}}
+        setSelected={(val) => { setSelectedType(val); get(val); }}
         data={notData}
         save="key"
         placeholder='Not Tipi Seçiniz'
@@ -562,29 +632,75 @@ const get = (val) => {
 }
 
 function UserConfirmationScreen({ navigation }) {
-  const [selected, setSelected] = React.useState("");
-  const data = [
-    { key: '1', value: 'Mobiles', disabled: true },
-    { key: '2', value: 'Appliances' },
-    { key: '3', value: 'Cameras' },
-    { key: '4', value: 'Computers', disabled: true },
-    { key: '5', value: 'Vegetables' },
-    { key: '6', value: 'Diary Products' },
-    { key: '7', value: 'Drinks' },
-  ];
+  const [selectedUser, setSelectedUser] = React.useState(-1);
+  const [dataUser, setDataUser] = React.useState([]);
+  const [db, setDb] = React.useState(null);
+  React.useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      SQLite.enablePromise(true);
+      SQLite.openDatabase({ name: 'rnSqliteSample.db', location: 'Documents' })
+        .then(dbRes => {
+          setDb(dbRes);
+          dbRes.executeSql(
+            `SELECT * FROM TBLKULLANICI WHERE BYTDURUM=0 AND BYTUNVAN=0;`,
+          )
+            .then(result => {
+              if (result?.[0].rows.length > 0) {
+                let currData = [];
+                for (let index = 0; index < result?.[0].rows.length; index++) {
+                  let item = result?.[0].rows.item(index);
+                  currData.push({ key: item.LNGKOD, value: item.TXTAD + ' ' + item.TXTSOYAD, disabled: false });
+                }
+                setDataUser(currData);
+              }
+            })
+            .catch(e => {
+              //genericError(e);
+            });
+
+        })
+    });
+    return unsubscribe
+  }, [navigation]);
+
+
+  const save = () => {
+    if (selectedUser != -1) {
+      db.executeSql(
+        `UPDATE TBLKULLANICI SET BYTDURUM=1 WHERE LNGKOD=${selectedUser}`,
+      )
+        .then(result => {
+
+          alert('Öğrenci aktife çekildi');
+        })
+        .catch(e => {
+          console.log(e);
+        });
+    } else {
+      alert('Lütfen boş bırakmayınız');
+    }
+
+
+  }
+
+
   return (
     <Stack spacing={16} fill style={{ margin: 12 }}>
       <SelectList
-        setSelected={(val) => setSelected(val)}
-        data={data}
-        save="value"
+       boxStyles={{backgroundColor:'white'}}
+       dropdownStyles={{backgroundColor:'white'}}
+       inputStyles={{color:'black'}}
+       dropdownTextStyles={{color:'black'}}
+        setSelected={(val) => setSelectedUser(val)}
+        data={dataUser}
+        save="key"
         placeholder='Kullanıcı Seçiniz'
 
       />
       <View style={{ marginTop: 8 }}></View>
 
 
-      <Button color='#292559' title="ONAYLA" onPress={() => alert("🎉🎉🎉")} />
+      <Button color='#292559' title="ONAYLA" onPress={save} />
     </Stack>
   );
 }
@@ -597,31 +713,34 @@ function AddMenuScreen({ navigation }) {
 
 
   React.useEffect(() => {
-    SQLite.enablePromise(true);
-    SQLite.openDatabase({ name: 'rnSqliteSample.db', location: 'Documents' })
-      .then(dbRes => {
-        setDb(dbRes);
+    const unsubscribe = navigation.addListener('focus', () => {
+      SQLite.enablePromise(true);
+      SQLite.openDatabase({ name: 'rnSqliteSample.db', location: 'Documents' })
+        .then(dbRes => {
+          setDb(dbRes);
 
-        dbRes.executeSql(
-          `SELECT * FROM TBLYEMEKLER  WHERE TRHTARIH='${date.toISOString().slice(0, 10)}';`,
-        )
-          .then(result => {
-            if (result?.[0].rows.length > 0) {
-              let food = result?.[0].rows.item(0);
-              setMenu(food.TXTAD);
+          dbRes.executeSql(
+            `SELECT * FROM TBLYEMEKLER  WHERE TRHTARIH='${date.toISOString().slice(0, 10)}';`,
+          )
+            .then(result => {
+              if (result?.[0].rows.length > 0) {
+                let food = result?.[0].rows.item(0);
+                setMenu(food.TXTAD);
 
-            } else {
+              } else {
+                setMenu('');
+              }
+            })
+            .catch(e => {
               setMenu('');
-            }
-          })
-          .catch(e => {
-            setMenu('');
-          });
+            });
 
 
-      })
-      .catch(e => { console.log(e); });
-  }, [setDate, setMenu, setDb]);
+        })
+        .catch(e => { console.log(e); });
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   const showDatePicker = () => {
     MaterialDatetimePickerAndroid.show({
@@ -634,11 +753,11 @@ function AddMenuScreen({ navigation }) {
           `SELECT * FROM TBLYEMEKLER  WHERE TRHTARIH='${date.toISOString().slice(0, 10)}';`,
         )
           .then(result => {
-        
+
             if (result?.[0].rows.length > 0) {
-           
+
               let food = result?.[0].rows.item(0);
-            
+
               setMenu(food.TXTAD);
 
             } else {
@@ -736,23 +855,21 @@ export default function App() {
     return <Text>Yükleniyor</Text>
   } else {
     return (
-      <Drawer.Navigator drawerContent={(props) => <CustomDrawerContent {...props} username={username} title={title} />} initialRouteName="AddOrUpdateGrade">
+      <Drawer.Navigator drawerContent={(props) => <CustomDrawerContent {...props} username={username} title={title} />} initialRouteName="Home">
         <Drawer.Screen name="Home" component={HomeScreen} options={{ title: 'Anasayfa' }} />
-
-        {/* 
-      {titleType == 2 ? :null}
-      {titleType == 2 ? <Drawer.Screen name="UserConfirmation" component={UserConfirmationScreen} options={{ title: 'Kullanıcı Onayla' }} />:null}
-      {titleType == 2 ? <Drawer.Screen name="AddMenu" component={AddMenuScreen} options={{ title: 'Yemek Listesi Ekle/Güncelle' }} />:null}
- */}
-        <Drawer.Screen name="AddCourse" component={AddCourseScreen} options={{ title: 'Ders Ekle' }} />
-        <Drawer.Screen name="AddOrUpdateGrade" component={AddOrUpdateGradeScreen} options={{ title: 'Not Gir/Güncelle' }} />
-        <Drawer.Screen name="AddMenu" component={AddMenuScreen} options={{ title: 'Yemek Listesi Ekle/Güncelle' }} />
-        <Drawer.Screen name="AddAnnouncement" component={AddAnnouncementScreen} options={{ title: 'Duyuru Ekle' }} />
+        
+        {titleType == 0 ? <Drawer.Screen name="Grade" component={GradeScreen} options={{ title: 'Notlarım' }} /> : null}
+        {titleType == 2 ? <Drawer.Screen name="UserConfirmation" component={UserConfirmationScreen} options={{ title: 'Kullanıcı Onayla' }} /> : null}
+        {titleType == 2 ? <Drawer.Screen name="AddMenu" component={AddMenuScreen} options={{ title: 'Yemek Listesi Ekle/Güncelle' }} /> : null}
+        {titleType == 2 ? <Drawer.Screen name="AddCourse" component={AddCourseScreen} options={{ title: 'Ders Ekle' }} /> : null}
+        {titleType == 1 ? <Drawer.Screen name="AddOrUpdateGrade" component={AddOrUpdateGradeScreen} options={{ title: 'Not Gir/Güncelle' }} /> : null}
+        {titleType == 2 ? <Drawer.Screen name="AddAnnouncement" component={AddAnnouncementScreen} options={{ title: 'Duyuru Ekle' }} /> : null}
 
         <Drawer.Screen name="Course" component={CourseScreen} options={{ title: 'Dersler' }} />
-        <Drawer.Screen name="Grade" component={GradeScreen} options={{ title: 'Notlarım' }} />
         <Drawer.Screen name="Announcement" component={AnnouncementScreen} options={{ title: 'Duyurular' }} />
         <Drawer.Screen name="DinnerList" component={DinnerListScreen} options={{ title: 'Yemek Listesi' }} />
+
+
       </Drawer.Navigator>
     );
   }

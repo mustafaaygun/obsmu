@@ -74,17 +74,12 @@ TRHTARIH DATE NOT NULL UNIQUE
             `INSERT INTO TBLKULLANICI
       (TXTTCKIMLIKNO,TXTPAROLA,TXTAD,TXTSOYAD,TXTTELEFONNO,TXTEMAIL,BYTUNVAN,BYTPAROLADURUM,BYTDURUM) 
       VALUES
-      ('12345678121','123456', 'MUSATAFA', 'AYGÜN', '5555555555','M@M.COM.TR',0,1,1);
-      `,
-          )
-            .then(result => recordsInserted(result))
-            .catch(e => {
-              genericError(e);
-            });
+      ('12345678121','123456', 'Arda', 'AK', '5555555555','M@M.COM.TR',0,1,1);
+      `,)
         }
       });
 
-      db.executeSql(
+    db.executeSql(
       `SELECT * FROM TBLKULLANICI WHERE TXTTCKIMLIKNO='12345678122';`,
     )
       .then(result => {
@@ -94,17 +89,13 @@ TRHTARIH DATE NOT NULL UNIQUE
             `INSERT INTO TBLKULLANICI
         (TXTTCKIMLIKNO,TXTPAROLA,TXTAD,TXTSOYAD,TXTTELEFONNO,TXTEMAIL,BYTUNVAN,BYTPAROLADURUM,BYTDURUM) 
         VALUES
-        ('12345678122','123456', 'MUSATAFA', 'AYGÜN', '5555555555','M@M.COM.TR',1,1,1);
+        ('12345678122','123456', 'Akın', 'AK', '5555555555','M@M.COM.TR',1,1,1);
         `,
           )
-            .then(result => recordsInserted(result))
-            .catch(e => {
-              genericError(e);
-            });
         }
       })
 
-      db.executeSql(
+    db.executeSql(
       `SELECT * FROM TBLKULLANICI WHERE TXTTCKIMLIKNO='12345678123';`,
     )
       .then(result => {
@@ -114,13 +105,10 @@ TRHTARIH DATE NOT NULL UNIQUE
             `INSERT INTO TBLKULLANICI
           (TXTTCKIMLIKNO,TXTPAROLA,TXTAD,TXTSOYAD,TXTTELEFONNO,TXTEMAIL,BYTUNVAN,BYTPAROLADURUM,BYTDURUM) 
           VALUES
-          ('12345678123','123456', 'MUSATAFA', 'AYGÜN', '5555555555','M@M.COM.TR',2,1,1);
+          ('12345678123','123456', 'Emrah', 'AK', '5555555555','M@M.COM.TR',2,1,1);
           `,
           )
-            .then(result => recordsInserted(result))
-            .catch(e => {
-              genericError(e);
-            });
+
         }
       })
 
@@ -128,9 +116,7 @@ TRHTARIH DATE NOT NULL UNIQUE
       `SELECT * FROM TBLAKTIFKULLANICI;`,
     )
       .then(result => recordsSelected(result))
-      .catch(e => {
-        genericError(e);
-      });
+
 
 
     const recordsSelected = (result) => {

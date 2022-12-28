@@ -1,15 +1,17 @@
 import * as React from 'react';
-import { createStackNavigator } from '@react-navigation/stack'
-import { View, ScrollView } from 'react-native';
+import { View } from 'react-native';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navigation/drawer';
 import { Button, Stack, TextInput, Avatar, Text, Pressable, Switch } from "@react-native-material/core";
 import { MaterialDatetimePickerAndroid } from 'react-native-material-datetime-picker';
-import SQLite, { SQLiteDatabase, ResultSet } from 'react-native-sqlite-storage';
+import SQLite from 'react-native-sqlite-storage';
 import AnnouncmentList from '../components/AnnouncmentList';
 import StudyList from '../components/StudyList';
 import GradeList from '../components/GradeList';
 import { SelectList } from 'react-native-dropdown-select-list'
 import { CommonActions } from '@react-navigation/native';
+const Drawer = createDrawerNavigator();
+
+// Anasayfa
 function HomeScreen({ navigation }) {
 
   const [db, setDb] = React.useState(null);
@@ -18,8 +20,7 @@ function HomeScreen({ navigation }) {
 
   React.useEffect(() => {
 
-    let unsubscribe = navigation.addListener('focus', () => {
-
+    let unsubscribe = navigation.addListener('state', () => {
       SQLite.enablePromise(true);
       SQLite.openDatabase({ name: 'rnSqliteSample.db', location: 'Documents' })
         .then(dbRes => {
@@ -38,9 +39,7 @@ function HomeScreen({ navigation }) {
               }
 
             })
-            .catch(e => {
 
-            });
           dbRes.executeSql(
             `SELECT * FROM TBLYEMEKLER  WHERE TRHTARIH='${new Date().toISOString().slice(0, 10)}';`,
           )
@@ -55,10 +54,10 @@ function HomeScreen({ navigation }) {
             })
             .catch(e => {
               setCurr('');
-
             });
         })
     });
+
     return unsubscribe;
   }, [navigation]);
 
@@ -68,11 +67,7 @@ function HomeScreen({ navigation }) {
     </Stack>
   );
 }
-
-const Stacks = createStackNavigator()
-
-
-
+// Ders listesi ekranı
 function CourseScreen({ navigation }) {
   const [db, setDb] = React.useState(null);
   const [data, setData] = React.useState([]);
@@ -85,8 +80,7 @@ function CourseScreen({ navigation }) {
           setDb(dbRes);
           dbRes.executeSql(
             `SELECT * FROM TBLDERSLER;`,
-          )
-            .then(result => {
+          ).then(result => {
               if (result?.[0].rows.length > 0) {
                 let currData = [];
                 for (let index = 0; index < result?.[0].rows.length; index++) {
@@ -96,19 +90,10 @@ function CourseScreen({ navigation }) {
                 setData(currData);
               }
             })
-            .catch(e => {
-              //genericError(e);
-            });
-
-
         })
-
     })
     return unsubscribe;
-
-
   }, [navigation]);
-
   return (
     <Stack fill style={{ margin: 12 }}>
       {StudyList(data)}
@@ -117,6 +102,7 @@ function CourseScreen({ navigation }) {
   );
 }
 
+// Ders notları ekranı
 function GradeScreen({ navigation }) {
   const [db, setDb] = React.useState(null);
   const [curr, setCurr] = React.useState([]);
@@ -135,42 +121,23 @@ function GradeScreen({ navigation }) {
             .then(result => {
               if (result?.[0].rows.length > 0) {
                 let user = result?.[0].rows.item(0);
-
-
-
                 dbRes.executeSql(
                   `SELECT D.TXTAD,N.LNGKOD,N.DBLVIZE,N.DBLFINAL FROM TBLNOTLAR N
                   INNER JOIN TBLDERSLER D ON D.LNGKOD=N.LNGDERSKOD
                   WHERE N.LNGOGRENCIKOD=${user.LNGOGRENCIKOD};`,
-                )
-                  .then(result => {
-
-
-                    if (result?.[0].rows.length > 0) {
-
-                      let currData = [];
-                      for (let index = 0; index < result?.[0].rows.length; index++) {
-                        let item = result?.[0].rows.item(index);
-                        currData.push({ id: item.LNGKOD, title: item.TXTAD, vize: item.DBLVIZE, final: item.DBLFINAL });
-                      }
-                      setCurr(currData);
-                    } else {
-                      //setCurr('');
-
+                ).then(result => {
+                  if (result?.[0].rows.length > 0) {
+                    let currData = [];
+                    for (let index = 0; index < result?.[0].rows.length; index++) {
+                      let item = result?.[0].rows.item(index);
+                      currData.push({ id: item.LNGKOD, title: item.TXTAD, vize: item.DBLVIZE, final: item.DBLFINAL });
                     }
-                  })
-                  .catch(e => {
-                    console.log(e)
-                  });
-
-
+                    setCurr(currData);
+                  }
+                })
               }
             })
-            .catch(e => {
-              console.log(e);
-            });
         })
-        .catch(e => console.log(e));
     })
     return unsubscribe;
 
@@ -182,7 +149,7 @@ function GradeScreen({ navigation }) {
     </Stack>
   );
 }
-
+// Duyurular ekranı
 function AnnouncementScreen({ navigation }) {
   const [db, setDb] = React.useState(null);
   const [data, setData] = React.useState(null);
@@ -206,13 +173,10 @@ function AnnouncementScreen({ navigation }) {
                 setData(currData);
               }
             })
-            .catch(e => {
-              //genericError(e);
-            });
+
         })
     });
     return unsubscribe;
-
 
   }, [navigation]);
 
@@ -222,13 +186,11 @@ function AnnouncementScreen({ navigation }) {
     </Stack>
   );
 }
-
+// Yemek listesi ekranı
 function DinnerListScreen({ navigation }) {
   const [date, setDate] = React.useState(new Date());
   const [menu, setMenu] = React.useState('');
-
   const [db, setDb] = React.useState(null);
-
 
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -236,7 +198,6 @@ function DinnerListScreen({ navigation }) {
       SQLite.openDatabase({ name: 'rnSqliteSample.db', location: 'Documents' })
         .then(dbRes => {
           setDb(dbRes);
-
           dbRes.executeSql(
             `SELECT * FROM TBLYEMEKLER  WHERE TRHTARIH='${date.toISOString().slice(0, 10)}';`,
           )
@@ -252,10 +213,8 @@ function DinnerListScreen({ navigation }) {
             .catch(e => {
               setMenu('');
             });
-
-
         })
-        .catch(e => { console.log(e); });
+
     });
     return unsubscribe;
 
@@ -291,7 +250,6 @@ function DinnerListScreen({ navigation }) {
 
   };
 
-
   return (
     <Stack spacing={16} fill style={{ margin: 12 }}>
       <Pressable onPress={showDatePicker}>
@@ -302,9 +260,7 @@ function DinnerListScreen({ navigation }) {
     </Stack>
   );
 }
-
-const Drawer = createDrawerNavigator();
-
+// Drawer navigation
 function CustomDrawerContent(props) {
 
   const logout = () => {
@@ -332,10 +288,10 @@ function CustomDrawerContent(props) {
         <Avatar image={{ uri: "https://atauni.edu.tr/images/logo-3.png" }} size={50} style={{ alignSelf: 'center' }} />
         <Text variant='caption'>ÖBS MOBİL APP</Text>
         <Stack spacing={6}>
-        
-        <Text variant='overline'>{props.username}</Text>
-        <Text variant='overline'>{props.title}</Text>
-        <Pressable onPress={logout}><Text variant='overline' style={{color:'red'}}>Çıkış Yap</Text></Pressable>
+
+          <Text variant='overline'>{props.username}</Text>
+          <Text variant='overline'>{props.title}</Text>
+          <Pressable onPress={logout}><Text variant='overline' style={{ color: 'red' }}>Çıkış Yap</Text></Pressable>
         </Stack>
       </View>
       {<DrawerItemList {...props} />}
@@ -343,7 +299,7 @@ function CustomDrawerContent(props) {
     </DrawerContentScrollView>
   );
 }
-
+// Ders ekmele ekranı
 function AddCourseScreen({ navigation }) {
   const [course, setCourse] = React.useState('');
   const [db, setDb] = React.useState(null);
@@ -352,7 +308,7 @@ function AddCourseScreen({ navigation }) {
       SQLite.enablePromise(true);
       SQLite.openDatabase({ name: 'rnSqliteSample.db', location: 'Documents' })
         .then(dbRes => { setDb(dbRes); })
-        .catch(e => { console.log(e); });
+
     });
     return unsubscribe;
   }, [navigation]);
@@ -370,9 +326,7 @@ function AddCourseScreen({ navigation }) {
         .then(result => {
           alert('Ekleme başarılı!');
         })
-        .catch(e => {
-          console.log(e);
-        });
+
 
     } else {
       alert('Lütfen boş bırakmayınız');
@@ -390,7 +344,7 @@ function AddCourseScreen({ navigation }) {
     </Stack>
   );
 }
-
+// Duyuru ekleme ekranı
 function AddAnnouncementScreen({ navigation }) {
   const [announcment, setAnnouncment] = React.useState('');
   const [db, setDb] = React.useState(null);
@@ -400,7 +354,7 @@ function AddAnnouncementScreen({ navigation }) {
       SQLite.enablePromise(true);
       SQLite.openDatabase({ name: 'rnSqliteSample.db', location: 'Documents' })
         .then(dbRes => { setDb(dbRes); })
-        .catch(e => { console.log(e); });
+
     });
     return unsubscribe;
   }, [navigation]);
@@ -418,10 +372,6 @@ function AddAnnouncementScreen({ navigation }) {
         .then(result => {
           alert('Ekleme başarılı!');
         })
-        .catch(e => {
-          console.log(e);
-        });
-
     } else {
       alert('Lütfen boş bırakmayınız');
     }
@@ -442,9 +392,8 @@ function AddAnnouncementScreen({ navigation }) {
     </Stack>
   );
 }
-
+// Not girme güncelleme ekranı
 function AddOrUpdateGradeScreen({ navigation }) {
-
   const [db, setDb] = React.useState(null);
   const [dataUser, setDataUser] = React.useState([]);
   const [dataLesson, setDataLesson] = React.useState([]);
@@ -471,38 +420,25 @@ function AddOrUpdateGradeScreen({ navigation }) {
                 setDataUser(currData);
               }
             })
-            .catch(e => {
-              //genericError(e);
-            });
-
           dbRes.executeSql(
             `SELECT * FROM TBLDERSLER;`,
           )
             .then(result => {
-
               if (result?.[0].rows.length > 0) {
                 let currData = [];
                 for (let index = 0; index < result?.[0].rows.length; index++) {
                   let item = result?.[0].rows.item(index);
-                  console.log(item)
 
                   currData.push({ key: item.LNGKOD, value: item.TXTAD, disabled: false });
                 }
                 setDataLesson(currData);
-              } else {
-
               }
             })
-            .catch(e => {
-              console.log(e);
-            });
+
         })
     });
     return unsubscribe;
-
-
   }, [navigation]);
-
 
   const save = () => {
     if (grade && grade.trim() && grade > 0 && selectedUser != -1 && selectedLesson != -1 && selectedType != -1) {
@@ -520,9 +456,7 @@ function AddOrUpdateGradeScreen({ navigation }) {
             .then(result => {
               alert('Ekleme başarılı!');
             })
-            .catch(e => {
-              console.log(e);
-            });
+
         } else {
           db.executeSql(
             `INSERT INTO TBLNOTLAR
@@ -531,19 +465,11 @@ function AddOrUpdateGradeScreen({ navigation }) {
             (${selectedUser},${selectedLesson},${grade});`,
           )
             .then(result => {
-              console.log(`INSERT INTO TBLNOTLAR
-              (LNGOGRENCIKOD,LNGDERSKOD,${selected}) 
-              VALUES
-              (${selectedUser},${selectedLesson},${grade});`);
               alert('Ekleme başarılı!');
             })
-            .catch(e => {
-              console.log(e);
-            });
+
         }
       })
-
-
     } else {
       alert('Lütfen boş bırakmayınız');
     }
@@ -556,14 +482,13 @@ function AddOrUpdateGradeScreen({ navigation }) {
       setGrade('');
       let selected = 'DBLFINAL';
 
-
       db.executeSql(
         `SELECT * FROM TBLNOTLAR WHERE LNGOGRENCIKOD=${selectedUser} AND LNGDERSKOD=${selectedLesson};`,
       ).then(result => {
-        console.log('m')
+
         if (result?.[0].rows.length > 0) {
           let grade = result?.[0].rows.item(0);
-          console.log(grade)
+
           if (val == 1) {
             setGrade(grade.DBLVIZE.toString());
           } else {
@@ -573,24 +498,23 @@ function AddOrUpdateGradeScreen({ navigation }) {
               setGrade(grade.DBLFINAL.toString());
             }
           }
-          //setCurr(food.TXTAD);
-        } else {
-          //setCurr('yok');
         }
       });
     }
   }
+
   const notData = [
     { key: 1, value: 'Vize', disabled: false },
     { key: 2, value: 'Final', disabled: false },
   ];
+
   return (
     <Stack spacing={16} fill style={{ margin: 12 }}>
       <SelectList
-      boxStyles={{backgroundColor:'white'}}
-      dropdownStyles={{backgroundColor:'white'}}
-      inputStyles={{color:'black'}}
-      dropdownTextStyles={{color:'black'}}
+        boxStyles={{ backgroundColor: 'white' }}
+        dropdownStyles={{ backgroundColor: 'white' }}
+        inputStyles={{ color: 'black' }}
+        dropdownTextStyles={{ color: 'black' }}
         setSelected={(val) => { setSelectedUser(val); get(val); }}
         data={dataUser}
         save="key"
@@ -598,10 +522,10 @@ function AddOrUpdateGradeScreen({ navigation }) {
       />
       <View style={{ marginTop: 8 }}></View>
       <SelectList
-       boxStyles={{backgroundColor:'white'}}
-       dropdownStyles={{backgroundColor:'white'}}
-       inputStyles={{color:'black'}}
-       dropdownTextStyles={{color:'black'}}
+        boxStyles={{ backgroundColor: 'white' }}
+        dropdownStyles={{ backgroundColor: 'white' }}
+        inputStyles={{ color: 'black' }}
+        dropdownTextStyles={{ color: 'black' }}
         setSelected={(val) => { setSelectedLesson(val); get(val); }}
         data={dataLesson}
         save="key"
@@ -609,10 +533,10 @@ function AddOrUpdateGradeScreen({ navigation }) {
       />
       <View style={{ marginTop: 8 }}></View>
       <SelectList
-       boxStyles={{backgroundColor:'white'}}
-       dropdownStyles={{backgroundColor:'white'}}
-       inputStyles={{color:'black'}}
-       dropdownTextStyles={{color:'black'}}
+        boxStyles={{ backgroundColor: 'white' }}
+        dropdownStyles={{ backgroundColor: 'white' }}
+        inputStyles={{ color: 'black' }}
+        dropdownTextStyles={{ color: 'black' }}
         setSelected={(val) => { setSelectedType(val); get(val); }}
         data={notData}
         save="key"
@@ -625,12 +549,11 @@ function AddOrUpdateGradeScreen({ navigation }) {
         value={grade}
         onChangeText={setGrade}
       />
-
       <Button color='#292559' title="KAYDET" onPress={save} />
     </Stack>
   );
 }
-
+// Öğrenci onaylama ekranı
 function UserConfirmationScreen({ navigation }) {
   const [selectedUser, setSelectedUser] = React.useState(-1);
   const [dataUser, setDataUser] = React.useState([]);
@@ -654,15 +577,10 @@ function UserConfirmationScreen({ navigation }) {
                 setDataUser(currData);
               }
             })
-            .catch(e => {
-              //genericError(e);
-            });
-
         })
     });
     return unsubscribe
   }, [navigation]);
-
 
   const save = () => {
     if (selectedUser != -1) {
@@ -671,11 +589,9 @@ function UserConfirmationScreen({ navigation }) {
       )
         .then(result => {
 
-          alert('Öğrenci aktife çekildi');
+          alert('Öğrenci aktif giriş yapabilir!');
         })
-        .catch(e => {
-          console.log(e);
-        });
+
     } else {
       alert('Lütfen boş bırakmayınız');
     }
@@ -683,14 +599,13 @@ function UserConfirmationScreen({ navigation }) {
 
   }
 
-
   return (
     <Stack spacing={16} fill style={{ margin: 12 }}>
       <SelectList
-       boxStyles={{backgroundColor:'white'}}
-       dropdownStyles={{backgroundColor:'white'}}
-       inputStyles={{color:'black'}}
-       dropdownTextStyles={{color:'black'}}
+        boxStyles={{ backgroundColor: 'white' }}
+        dropdownStyles={{ backgroundColor: 'white' }}
+        inputStyles={{ color: 'black' }}
+        dropdownTextStyles={{ color: 'black' }}
         setSelected={(val) => setSelectedUser(val)}
         data={dataUser}
         save="key"
@@ -704,7 +619,7 @@ function UserConfirmationScreen({ navigation }) {
     </Stack>
   );
 }
-
+// Yemek menüsü ekleme ekranı
 function AddMenuScreen({ navigation }) {
   const [date, setDate] = React.useState(new Date());
   const [menu, setMenu] = React.useState('');
@@ -737,7 +652,7 @@ function AddMenuScreen({ navigation }) {
 
 
         })
-        .catch(e => { console.log(e); });
+
     });
     return unsubscribe;
   }, [navigation]);
@@ -771,6 +686,7 @@ function AddMenuScreen({ navigation }) {
     });
 
   };
+
   const save = () => {
     if (menu && menu.trim()) {
       const currDate = date.toISOString().slice(0, 10);
@@ -784,9 +700,7 @@ function AddMenuScreen({ navigation }) {
         .then(result => {
           alert('Ekleme başarılı!');
         })
-        .catch(e => {
-          console.log(e);
-        });
+
 
     } else {
       alert('Lütfen boş bırakmayınız');
@@ -804,7 +718,7 @@ function AddMenuScreen({ navigation }) {
     </Stack>
   );
 }
-
+// Ana navigasyon çatısı
 export default function App() {
   const [db, setDb] = React.useState(null);
   const [username, setUsername] = React.useState('');
@@ -844,20 +758,18 @@ export default function App() {
               alert('Kullanıcı adı veya parolanız hatalı!');
             }
           })
-          .catch(e => {
-            console.log(e);
-          });
+
       })
-      .catch(e => console.log(e));
+
   }, []);
 
   if (titleType == -1) {
     return <Text>Yükleniyor</Text>
   } else {
     return (
-      <Drawer.Navigator drawerContent={(props) => <CustomDrawerContent {...props} username={username} title={title} />} initialRouteName="Home">
+      <Drawer.Navigator drawerContent={(props) => <CustomDrawerContent {...props} username={username} title={title} />} >
         <Drawer.Screen name="Home" component={HomeScreen} options={{ title: 'Anasayfa' }} />
-        
+
         {titleType == 0 ? <Drawer.Screen name="Grade" component={GradeScreen} options={{ title: 'Notlarım' }} /> : null}
         {titleType == 2 ? <Drawer.Screen name="UserConfirmation" component={UserConfirmationScreen} options={{ title: 'Kullanıcı Onayla' }} /> : null}
         {titleType == 2 ? <Drawer.Screen name="AddMenu" component={AddMenuScreen} options={{ title: 'Yemek Listesi Ekle/Güncelle' }} /> : null}
